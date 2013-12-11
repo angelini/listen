@@ -6,12 +6,20 @@ var _       = require('underscore'),
     Cookies = require('cookies'),
     router  = require('./router');
 
+var PORT = 8080;
+
 var db      = redis.createClient(),
     keygrip = new Keygrip(['DEV_KEY']);
+
+var logRequest = function(url, request) {
+  console.log([request.method, url.pathname].join(' '));
+};
 
 var server = http.createServer(function(request, response) {
   var parsed = url.parse(request.url),
       route  = router.match(parsed.pathname);
+
+  logRequest(parsed, request);
 
   if (!route) {
     response.writeHead(404);
@@ -23,7 +31,8 @@ var server = http.createServer(function(request, response) {
     cookies: new Cookies(request, response, keygrip)
   });
 
-  route.fn.apply(route.params, request, response);
+  route.fn.call(route.params, request, response);
 });
 
-server.listen(8080);
+server.listen(PORT);
+console.log('Listening on port ' + PORT);
