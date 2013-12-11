@@ -6,7 +6,11 @@
   "dependencies": {
     "async": "~0.2.9",
     "redis": "~0.9.1",
-    "routes": "~0.2.0"
+    "routes": "~0.2.0",
+    "cookies": "~0.3.8",
+    "underscore": "~1.5.2",
+    "keygrip": "~0.2.4",
+    "bcrypt": "~0.7.7"
   },
   "devDependencies": {},
   "scripts": {

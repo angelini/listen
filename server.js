@@ -1,10 +1,13 @@
-var _      = require('underscore'),
-    url    = require('url'),
-    http   = require('http'),
-    redis  = require('redis'),
-    router = require('./router');
+var _       = require('underscore'),
+    url     = require('url'),
+    http    = require('http'),
+    redis   = require('redis'),
+    Keygrip = require('keygrip'),
+    Cookies = require('cookies'),
+    router  = require('./router');
 
-var db = redis.createClient();
+var db      = redis.createClient(),
+    keygrip = new Keygrip(['DEV_KEY']);
 
 var server = http.createServer(function(request, response) {
   var parsed = url.parse(request.url),
@@ -12,11 +15,13 @@ var server = http.createServer(function(request, response) {
 
   if (!route) {
     response.writeHead(404);
-    response.end();
-    return;
+    return response.end();
   }
 
-  _.extend(route.params, {db: db});
+  _.extend(route.params, {
+    db: db,
+    cookies: new Cookies(request, response, keygrip)
+  });
 
   route.fn.apply(route.params, request, response);
 });
