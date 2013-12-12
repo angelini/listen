@@ -30,6 +30,8 @@ User.feedKey = function(id) { return ['user', id, 'feed'].join(':'); };
 
 User.friendsKey = function(id) { return ['user', id, 'friends'].join(':'); };
 
+User.pendingKey = function(id) { return ['users', id, 'pending'].join(':'); };
+
 User.songsKey = function(id) { return ['user', id, 'songs'].join(':'); };
 
 User.emailsKey = function() { return ['user', 'emails'].join(':'); };
@@ -84,6 +86,25 @@ User.prototype.postSongToFriends = function(db, songId, targetIds, callback) {
         db.lpush(User.feedKey(self.id), songId);
       },
       callback);
+  }));
+};
+
+User.prototype.addFriend = function(db, friendId, callback) {
+  db.sadd(User.pendingKey(friendId), this.id, callback);
+};
+
+User.prototype.acceptFriend = function(db, friendId, callback) {
+  var self = this;
+
+  db.srem(User.pendingKey(this.id), friendId, errorHandler(callback, function(wasPending) {
+    if (wasPending) {
+      async.parallel([
+          function(callback) { db.sadd(User.friendsKey(self.id), friendId, callback); },
+          function(callback) { db.sadd(User.friendsKey(friendId), self.id, callback); }
+        ], callback);
+    } else {
+      callback(null, 0);
+    }
   }));
 };
 

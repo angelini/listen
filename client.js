@@ -58,4 +58,19 @@ Client.prototype.friends = function(callback) {
   }, callback);
 };
 
+Client.prototype.addFriend = function(friendId, callback) {
+  this.request({
+    uri: this.apiURL('users', this.userId, 'friends', 'add'),
+    method: 'POST',
+    json: {friend: friendId}
+  }, callback);
+};
+
+Client.prototype.acceptFriend = function(friendId, callback) {
+  this.request({
+    uri: this.apiURL('users', this.userId, 'friends', friendId, 'accept'),
+    method: 'POST'
+  }, callback);
+};
+
 module.exports = Client;

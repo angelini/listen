@@ -135,6 +135,40 @@ router.addRoute('/api/users/:id/friends', before([requireLogin], function(reques
   }));
 }));
 
+router.addRoute('/api/users/:id/friends/add', before([requireLogin, readPostData], function(request, response) {
+  if (request.userId != this.id) {
+    return writeError(403, 'Unauthorized', response);
+  }
+
+  if (!request.body.friend) {
+    return writeError(400, 'Friend ID Required', response);
+  }
+
+  var user = new User(request.userId);
+  user.addFriend(this.db, request.body.friend, errorHandler(response, function() {
+    writeJSON(201, {}, response);
+  }));
+}));
+
+router.addRoute('/api/users/:id/friends/:friendId/accept', before([requireLogin], function(request, response) {
+  if (request.method != 'POST') {
+    return writeError(400, 'POST Required', response);
+  }
+
+  if (request.userId != this.id) {
+    return writeError(403, 'Unauthorized', response);
+  }
+
+  var user = new User(request.userId);
+  user.acceptFriend(this.db, this.friendId, errorHandler(response, function(wasAccepted) {
+    if (wasAccepted) {
+      writeJSON(201, {}, response);
+    } else {
+      writeError(404, 'Friend Request Not Found', response);
+    }
+  }));
+}));
+
 router.addRoute('/api/songs/post', before([requireLogin, readPostData], function(request, response) {
   var self = this,
       ratings = {};
