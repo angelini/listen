@@ -52,7 +52,7 @@ var before = function(filters, callback) {
   return function(request, response) {
     var self = this,
         wrappedFilters = _.map(filters, function(filter) {
-          return function(callback) { filter(request, response, callback); };
+          return function(callback) { filter.call(self, request, response, callback); };
         });
 
     async.series(wrappedFilters, function(err) {
@@ -90,7 +90,7 @@ router.addRoute('/api/users/create', before([readPostData], function(request, re
     }
 
     var user = new User(null, request.body.email, request.body.password);
-    user.save(self.db, errorHandler(response, function(user) {
+    user.save(self.db, errorHandler(response, function() {
       writeJSON(201, {id: user.id}, response);
     }));
   }));
@@ -120,7 +120,7 @@ router.addRoute('/api/users/:id/feed', before([requireLogin], function(request, 
     return writeError(403, 'Unauthorized', response);
   }
 
-  User.loadFeed(this.db, this.id, errorHandler(response, function(songs) {
+  User.loadFeed(this.db, this.id, 100, errorHandler(response, function(songs) {
     writeJSON(200, songs, response);
   }));
 }));
