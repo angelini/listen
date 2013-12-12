@@ -77,7 +77,7 @@ var errorHandler = function(response, callback) {
 
 var router = Routes();
 
-router.addRoute('/api/users/create', before([readPostData], function(request, response) {
+router.addRoute('/api/users', before([readPostData], function(request, response) {
   var self = this;
 
   if (!request.body.email || !request.body.password) {
@@ -169,27 +169,27 @@ router.addRoute('/api/users/:id/friends/:friendId/accept', before([requireLogin]
   }));
 }));
 
-router.addRoute('/api/songs/post', before([requireLogin, readPostData], function(request, response) {
+router.addRoute('/api/songs', before([requireLogin, readPostData], function(request, response) {
   var self = this,
       ratings = {};
 
-  if (!this.url || !this.friends) {
+  if (!request.body.url || !request.body.friends) {
     return writeError(400, 'URL and Friends Required', response);
   }
 
-  this.friends.forEach(function(friend) {
+  request.body.friends.forEach(function(friend) {
     ratings[friend] = 0;
   });
 
   var user = new User(request.userId),
-      song = new Song(null, this.url, request.userId, ratings);
+      song = new Song(null, request.body.url, request.userId, ratings);
 
-  song.save(this.db, errorHandler(function(song) {
+  song.save(this.db, errorHandler(response, function() {
     async.parallel([
         function(callback) { user.addSong(self.db, song.id, callback); },
-        function(callback) { user.postSongToFriend(self.db, song.id, self.friends, callback); }
+        function(callback) { user.postSongToFriends(self.db, song.id, request.body.friends, callback); }
       ],
-      errorHandler(function() {
+      errorHandler(response, function() {
         writeJSON(201, {}, response);
       }));
   }));
@@ -198,7 +198,7 @@ router.addRoute('/api/songs/post', before([requireLogin, readPostData], function
 router.addRoute('/api/songs/:id/up', before([requireLogin], function(request, response) {
   var user = new User(request.userId);
 
-  user.rateSong(this.id, 1, errorHandler(function() {
+  user.rateSong(this.id, 1, errorHandler(response, function() {
     writeJSON(201, {}, response);
   }));
 }));
@@ -206,7 +206,7 @@ router.addRoute('/api/songs/:id/up', before([requireLogin], function(request, re
 router.addRoute('/api/songs/:id/down', before([requireLogin], function(request, response) {
   var user = new User(request.userId);
 
-  user.rateSong(this.id, -1, errorHandler(function() {
+  user.rateSong(this.id, -1, errorHandler(response, function() {
     writeJSON(201, {}, response);
   }));
 }));

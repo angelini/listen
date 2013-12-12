@@ -40,7 +40,7 @@ Client.prototype.login = function(email, password, callback) {
 
 Client.prototype.create = function(email, password, callback) {
   this.request({
-    uri: this.apiURL('users', 'create'),
+    uri: this.apiURL('users'),
     method: 'POST',
     json: {email: email, password: password}
   }, callback);
@@ -70,6 +70,26 @@ Client.prototype.acceptFriend = function(friendId, callback) {
   this.request({
     uri: this.apiURL('users', this.userId, 'friends', friendId, 'accept'),
     method: 'POST'
+  }, callback);
+};
+
+Client.prototype.postSong = function(url, friends, callback) {
+  this.request({
+    uri: this.apiURL('songs'),
+    method: 'POST',
+    json: {url: url, friends: friends}
+  }, callback);
+};
+
+Client.prototype.upvoteSong = function(songId, callback) {
+  this.request({
+    uri: this.apiURL('songs', songId, 'up'),
+  }, callback);
+};
+
+Client.prototype.downvoteSong = function(songId, callback) {
+  this.request({
+    uri: this.apiURL('songs', songId, 'down'),
   }, callback);
 };
 

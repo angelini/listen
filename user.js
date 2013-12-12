@@ -76,14 +76,14 @@ User.loadFeed = function(db, id, limit, callback) {
 User.prototype.postSongToFriends = function(db, songId, targetIds, callback) {
   var self = this;
 
-  db.smemembers(User.friendsKey(this.id), errorHandler(callback, function(friendIds) {
+  db.smembers(User.friendsKey(this.id), errorHandler(callback, function(friendIds) {
     var validTargets = targetIds.filter(function(targetId) {
       return friendIds.indexOf(targetId) >= 0;
     });
 
     async.each(friendIds,
       function(friendId, callback) {
-        db.lpush(User.feedKey(self.id), songId);
+        db.lpush(User.feedKey(friendId), songId, callback);
       },
       callback);
   }));

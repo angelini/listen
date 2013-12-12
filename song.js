@@ -47,9 +47,11 @@ Song.prototype.create = function(db, callback) {
 };
 
 Song.prototype.update = function(db, callback) {
+  var self = this;
+
   async.parallel([
-      function(callback) { db.hmset(Song.key(this.id), this.toStorage()); },
-      function(callback) { db.hmset(Song.ratingsKey(this.id), this.ratings); }
+      function(callback) { db.hmset(Song.key(self.id), self.toStorage(), callback); },
+      function(callback) { db.hmset(Song.ratingsKey(self.id), self.ratings, callback); }
     ], callback);
 };
 
