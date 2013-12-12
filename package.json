@@ -10,7 +10,9 @@
     "cookies": "~0.3.8",
     "underscore": "~1.5.2",
     "keygrip": "~0.2.4",
-    "bcrypt": "~0.7.7"
+    "bcrypt": "~0.7.7",
+    "request": "~2.29.0",
+    "ansicolors": "~0.3.2"
   },
   "devDependencies": {},
   "scripts": {
