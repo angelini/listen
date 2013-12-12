@@ -12,6 +12,14 @@ var log = function(lines, color) {
   console.log(message);
 };
 
+var jsonString = function(obj) {
+  try {
+    obj = JSON.parse(obj);
+  } catch (e) {}
+
+  return JSON.stringify(obj, null, 4);
+};
+
 var context = {
   _: _,
   Client: Client,
@@ -24,11 +32,11 @@ var context = {
 
   p: function(err, response, body) {
     if (err) {
-      log(['ERROR', JSON.stringify(err, null, 4)], 'red');
+      log(['ERROR', jsonString(err)], 'red');
     } else {
       log([
         'STATUS: ' + response.statusCode,
-        JSON.stringify(body, null, 4),
+        jsonString(body)
       ]);
     }
   }
