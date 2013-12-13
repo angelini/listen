@@ -75,9 +75,9 @@ var errorHandler = function(response, callback) {
   };
 };
 
-var router = Routes();
+var routes = {};
 
-router.addRoute('/api/users', before([readPostData], function(request, response) {
+routes['/api/users'] = before([readPostData], function(request, response) {
   var self = this;
 
   if (!request.body.email || !request.body.password) {
@@ -94,9 +94,9 @@ router.addRoute('/api/users', before([readPostData], function(request, response)
       writeJSON(201, {id: user.id}, response);
     }));
   }));
-}));
+});
 
-router.addRoute('/api/users/login', before([readPostData], function(request, response) {
+routes['/api/users/login'] = before([readPostData], function(request, response) {
   var self = this;
 
   if (!request.body.email || !request.body.password) {
@@ -117,9 +117,9 @@ router.addRoute('/api/users/login', before([readPostData], function(request, res
       }
     }));
   }));
-}));
+});
 
-router.addRoute('/api/users/:id/feed', before([requireLogin], function(request, response) {
+routes['/api/users/:id/feed'] = before([requireLogin], function(request, response) {
   if (request.userId != this.id) {
     return writeError(403, 'Unauthorized', response);
   }
@@ -127,9 +127,9 @@ router.addRoute('/api/users/:id/feed', before([requireLogin], function(request, 
   User.loadFeed(this.db, this.id, 100, errorHandler(response, function(songs) {
     writeJSON(200, songs, response);
   }));
-}));
+});
 
-router.addRoute('/api/users/:id/friends', before([requireLogin], function(request, response) {
+routes['/api/users/:id/friends'] = before([requireLogin], function(request, response) {
   if (request.userId != this.id) {
     return writeError(403, 'Unauthorized', response);
   }
@@ -137,9 +137,9 @@ router.addRoute('/api/users/:id/friends', before([requireLogin], function(reques
   User.loadFriends(this.db, this.id, errorHandler(response, function(friends) {
     writeJSON(200, friends, response);
   }));
-}));
+});
 
-router.addRoute('/api/users/:id/friends/add', before([requireLogin, readPostData], function(request, response) {
+routes['/api/users/:id/friends/add'] = before([requireLogin, readPostData], function(request, response) {
   if (request.userId != this.id) {
     return writeError(403, 'Unauthorized', response);
   }
@@ -152,9 +152,9 @@ router.addRoute('/api/users/:id/friends/add', before([requireLogin, readPostData
   user.addFriend(this.db, request.body.friend, errorHandler(response, function() {
     writeJSON(201, {}, response);
   }));
-}));
+});
 
-router.addRoute('/api/users/:id/friends/:friendId/accept', before([requireLogin], function(request, response) {
+routes['/api/users/:id/friends/:friendId/accept'] = before([requireLogin], function(request, response) {
   if (request.method != 'POST') {
     return writeError(400, 'POST Required', response);
   }
@@ -171,9 +171,9 @@ router.addRoute('/api/users/:id/friends/:friendId/accept', before([requireLogin]
       writeError(404, 'Friend Request Not Found', response);
     }
   }));
-}));
+});
 
-router.addRoute('/api/songs', before([requireLogin, readPostData], function(request, response) {
+routes['/api/songs'] = before([requireLogin, readPostData], function(request, response) {
   var self = this,
       ratings = {};
 
@@ -197,22 +197,35 @@ router.addRoute('/api/songs', before([requireLogin, readPostData], function(requ
         writeJSON(201, {}, response);
       }));
   }));
-}));
+});
 
-router.addRoute('/api/songs/:id/up', before([requireLogin], function(request, response) {
+routes['/api/songs/:id/up'] = before([requireLogin], function(request, response) {
   var user = new User(request.userId);
 
   user.rateSong(this.id, 1, errorHandler(response, function() {
     writeJSON(201, {}, response);
   }));
-}));
+});
 
-router.addRoute('/api/songs/:id/down', before([requireLogin], function(request, response) {
+routes['/api/songs/:id/down'] = before([requireLogin], function(request, response) {
   var user = new User(request.userId);
 
   user.rateSong(this.id, -1, errorHandler(response, function() {
     writeJSON(201, {}, response);
   }));
-}));
+});
 
-module.exports = router;
+var Router = function() {
+  var self = this;
+
+  this._router = Routes();
+  _.each(routes, function(handler, path) {
+    self._router.addRoute(path, handler);
+  });
+};
+
+Router.prototype.match = function(url) {
+  return this._router.match(url);
+};
+
+module.exports = Router;
