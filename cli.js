@@ -12,14 +12,6 @@ var log = function(lines, color) {
   console.log(message);
 };
 
-var jsonString = function(obj) {
-  try {
-    obj = JSON.parse(obj);
-  } catch (e) {}
-
-  return JSON.stringify(obj, null, 4);
-};
-
 var context = {
   _: _,
   Client: Client,
@@ -30,13 +22,13 @@ var context = {
     context.c.login(DEFAULT_LOGIN.email, DEFAULT_LOGIN.password, context.p);
   },
 
-  p: function(err, response, body) {
+  p: function(err, response) {
     if (err) {
-      log(['ERROR', jsonString(err)], 'red');
+      log(['ERROR', JSON.stringify(err, null, 2)], 'red');
     } else {
       log([
-        'STATUS: ' + response.statusCode,
-        jsonString(body)
+        'STATUS: ' + response.status,
+        JSON.stringify(response.body, null, 2)
       ]);
     }
   }

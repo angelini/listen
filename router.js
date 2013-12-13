@@ -99,11 +99,15 @@ router.addRoute('/api/users', before([readPostData], function(request, response)
 router.addRoute('/api/users/login', before([readPostData], function(request, response) {
   var self = this;
 
-  if (!request.body.email || !request.body.email) {
+  if (!request.body.email || !request.body.password) {
     return writeError(400, 'Email and Password Required', response);
   }
 
   User.loadByEmail(this.db, request.body.email, errorHandler(response, function(user) {
+    if (!user) {
+      return writeError(404, 'User Not Found', response);
+    }
+
     bcrypt.compare(request.body.password, user.password, errorHandler(response, function(result) {
       if (result) {
         self.cookies.set(USER_COOKIE, user.id, {signed: true});

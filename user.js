@@ -49,6 +49,7 @@ User.load = function(db, id, callback) {
 
 User.loadByEmail = function(db, email, callback) {
   db.hget(User.emailsKey(), email, errorHandler(callback, function(id) {
+    if (!id) return callback();
     User.load(db, id, callback);
   }));
 };

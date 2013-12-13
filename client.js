@@ -3,6 +3,20 @@ var _       = require('underscore'),
     path    = require('path'),
     request = require('request');
 
+var output = function(callback) {
+  return function(err, response, body) {
+    try {
+      if (err) err = JSON.parse(err);
+      body = JSON.parse(body);
+    } catch (e) {}
+
+    callback(err, {
+      status: response.statusCode,
+      body: body
+    });
+  };
+};
+
 var Client = function(host, port) {
   this.jar     = request.jar();
   this.request = request.defaults({jar: this.jar});
@@ -34,7 +48,7 @@ Client.prototype.login = function(email, password, callback) {
     json: {email: email, password: password}
   }, function (err, response, body) {
     if (!err && body) self.userId = body.id;
-    callback(err, response, body);
+    output(callback)(err, response, body);
   });
 };
 
@@ -43,19 +57,19 @@ Client.prototype.create = function(email, password, callback) {
     uri: this.apiURL('users'),
     method: 'POST',
     json: {email: email, password: password}
-  }, callback);
+  }, output(callback));
 };
 
 Client.prototype.feed = function(callback) {
   this.request({
     uri: this.apiURL('users', this.userId, 'feed')
-  }, callback);
+  }, output(callback));
 };
 
 Client.prototype.friends = function(callback) {
   this.request({
     uri: this.apiURL('users', this.userId, 'friends')
-  }, callback);
+  }, output(callback));
 };
 
 Client.prototype.addFriend = function(friendId, callback) {
@@ -63,14 +77,14 @@ Client.prototype.addFriend = function(friendId, callback) {
     uri: this.apiURL('users', this.userId, 'friends', 'add'),
     method: 'POST',
     json: {friend: friendId}
-  }, callback);
+  }, output(callback));
 };
 
 Client.prototype.acceptFriend = function(friendId, callback) {
   this.request({
     uri: this.apiURL('users', this.userId, 'friends', friendId, 'accept'),
     method: 'POST'
-  }, callback);
+  }, output(callback));
 };
 
 Client.prototype.postSong = function(url, friends, callback) {
@@ -78,19 +92,19 @@ Client.prototype.postSong = function(url, friends, callback) {
     uri: this.apiURL('songs'),
     method: 'POST',
     json: {url: url, friends: friends}
-  }, callback);
+  }, output(callback));
 };
 
 Client.prototype.upvoteSong = function(songId, callback) {
   this.request({
     uri: this.apiURL('songs', songId, 'up'),
-  }, callback);
+  }, output(callback));
 };
 
 Client.prototype.downvoteSong = function(songId, callback) {
   this.request({
     uri: this.apiURL('songs', songId, 'down'),
-  }, callback);
+  }, output(callback));
 };
 
 module.exports = Client;
