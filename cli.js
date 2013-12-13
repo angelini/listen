@@ -1,7 +1,7 @@
 var _      = require('underscore'),
     repl   = require('repl'),
     colors = require('ansicolors'),
-    Client = require('./client');
+    Client = require('./src/Client');
 
 var DEFAULT_LOGIN = {email: 'first@test.com', password: '1234'};
 

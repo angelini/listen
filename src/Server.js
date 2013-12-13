@@ -7,10 +7,12 @@ var _       = require('underscore'),
     Router  = require('./router');
 
 var connectToRedis = function(config) {
+  if (!config.redis) config.redis = {};
+
   return redis.createClient(
-    config.redis.port,
-    config.redis.host,
-    config.redis.opions
+    config.redis.port   || 6379,
+    config.redis.host   || '127.0.0.1',
+    config.redis.opions || {}
   );
 };
 
@@ -57,7 +59,6 @@ Server.prototype.create = function() {
 
 Server.prototype.start = function() {
   this.create().listen(this.config.port);
-  console.log('Listening on port ' + this.config.port);
 };
 
 module.exports = Server;
