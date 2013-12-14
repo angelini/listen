@@ -74,6 +74,10 @@ User.loadFeed = function(db, id, limit, callback) {
   }));
 };
 
+User.prototype.toJSON = function() {
+  return {id: this.id, email: this.email};
+};
+
 User.prototype.postSongToFriends = function(db, songId, targetIds, callback) {
   var self = this;
 
