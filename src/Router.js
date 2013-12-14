@@ -13,6 +13,7 @@ var writeJSON = function(code, object, response) {
 };
 
 var writeError = function(code, message, response) {
+  console.trace(message);
   writeJSON(code, {error: message}, response);
 };
 
