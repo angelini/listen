@@ -5,7 +5,8 @@ var _      = require('underscore'),
     User   = require('./user'),
     Song   = require('./song');
 
-var USER_COOKIE = 'user_id';
+var ID_COOKIE    = 'user_id',
+    EMAIL_COOKIE = 'user_email';
 
 var writeJSON = function(code, object, response) {
   response.writeHead(code, {'Content-Type': 'application/json'});
@@ -40,7 +41,7 @@ var readPostData = function(request, response, callback) {
 };
 
 var requireLogin = function(request, response, callback) {
-  request.userId = this.cookies.get(USER_COOKIE, {signed: true});
+  request.userId = this.cookies.get(ID_COOKIE, {signed: true});
 
   if (request.userId) {
     callback();
@@ -111,7 +112,9 @@ routes['/api/users/login'] = before([readPostData], function(request, response) 
 
     bcrypt.compare(request.body.password, user.password, errorHandler(response, function(result) {
       if (result) {
-        self.cookies.set(USER_COOKIE, user.id, {signed: true});
+        self.cookies.set(ID_COOKIE, user.id, {signed: true, httpOnly: false});
+        self.cookies.set(EMAIL_COOKIE, user.email, {signed: true, httpOnly: false});
+
         writeJSON(200, {id: user.id}, response);
       } else {
         writeError(401, 'Wrong Password', response);
