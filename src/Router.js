@@ -198,7 +198,7 @@ routes['/api/songs'] = before([requireLogin, readPostData], function(request, re
         function(callback) { user.postSongToFriends(self.db, song.id, request.body.friends, callback); }
       ],
       errorHandler(response, function() {
-        writeJSON(201, {}, response);
+        writeJSON(201, {id: song.id}, response);
       }));
   }));
 });
